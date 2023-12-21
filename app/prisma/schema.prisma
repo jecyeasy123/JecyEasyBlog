@@ -1,0 +1,86 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User{
+id Int @id @default(autoincrement())
+lastname String 
+firstname String
+email String @unique
+posts Post[]
+comments Comment[]
+clerkUserId String @unique
+image String?
+}
+
+model Post{
+  id Int @id @default(autoincrement())
+  tittle String @unique
+  description String
+  slug String
+  body String
+  image String?
+  created_At DateTime @default(now())
+  update_At DateTime  @updatedAt
+  clerkUserId String
+  author User @relation(fields: [clerkUserId],references: [clerkUserId], onDelete:Cascade )
+  categoryId Int
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  @@map("posts")
+  comment Comment[]
+  tags Post_Tag[]
+
+}
+
+model Category{
+  id Int @id @default(autoincrement())
+  name String
+  description String @unique
+  created_At DateTime @default(now())
+  post Post[]
+}
+
+model Comment{
+  id Int @id @default(autoincrement())
+  text String
+  UserEmail String
+  user User @relation(fields: [UserEmail], references: [email], onDelete: Cascade)
+  postId Int
+  post Post @relation(fields: [postId],references: [id], onDelete:Cascade )
+  created_At DateTime @default(now())
+  update_At DateTime  @updatedAt
+  @@map("comments")
+}
+
+model Tag{
+  id Int @id @default(autoincrement())
+  name String @unique
+  description String?
+  created_At DateTime @default(now())
+  update_At DateTime  @updatedAt
+  @@index([id])
+  @@map("tags")
+  posts Post_Tag[]
+}
+
+model Post_Tag{
+  postId Int
+  post Post @relation(fields: [postId], references: [id])
+  tag Tag @relation(fields: [tagId], references: [id])
+  tagId Int
+  created_At DateTime @default(now())
+  @@id([postId, tagId])
+  
+}
+
+
+
+
